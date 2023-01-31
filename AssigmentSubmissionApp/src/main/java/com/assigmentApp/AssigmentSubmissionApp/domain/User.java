@@ -8,11 +8,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import jakarta.persistence.OneToMany;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,18 +34,15 @@ public class User implements UserDetails{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;	
 	
-	@Column(name = "cohort_start_date")
 	private LocalDate cohortStartDate;
 	
-	@Column(name = "username")
 	private String username;
 	
-	@Column(name = "password")
 	private String password;
 	
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
 	private Set<Authority> authorities = new HashSet<>();
 	
 	public User(String username, String password) {

@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import org.springframework.security.core.GrantedAuthority;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,13 +22,12 @@ public class Authority implements GrantedAuthority {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 	
-	@ManyToOne(optional = false)
+	@ManyToOne
+	@JsonIgnore
 	private User user;
 	
-	@Column(name = "authority")
 	private String authority;
 	
 	public Authority(String authority) {
@@ -53,6 +54,7 @@ public class Authority implements GrantedAuthority {
 		this.user = user;
 	}
 
+	@Override
 	public String getAuthority() {
 		return authority;
 	}
