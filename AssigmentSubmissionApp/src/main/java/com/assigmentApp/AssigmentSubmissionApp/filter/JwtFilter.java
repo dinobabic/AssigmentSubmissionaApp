@@ -2,6 +2,8 @@ package com.assigmentApp.AssigmentSubmissionApp.filter;
 
 import java.io.IOException;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.assigmentApp.AssigmentSubmissionApp.util.JwtUtil;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,27 +39,35 @@ public class JwtFilter extends OncePerRequestFilter {
         final String token;
         final String username; 
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        try {
+        	if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        token = authHeader.substring(7);
-        username = jwtService.extractUsername(token); // todo extract the userEmail from JWT token
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) { // if user is not connected jet
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            token = authHeader.substring(7);
+            username = jwtService.extractUsername(token); // todo extract the userEmail from JWT token
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) { // if user is not connected jet
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (jwtService.isTokenValid(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
             }
         }
+        catch (ExpiredJwtException e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			response.getWriter().write(e.getMessage());
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+			return;
+		}
         filterChain.doFilter(request, response);
     }
 }

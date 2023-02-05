@@ -1,30 +1,30 @@
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
+import AssigmentView from './assigmentView';
+import Dashboard from './dashboard';
+import Homepage from './homepage';
+import Login from './login';
+import PrivateRoute from './privateRoute';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
-
-  const requestBody = {
-    "username": "Dino",
-    "password": "1234"
-  };
-
-  fetch("api/auth/login", {
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(requestBody),
-    method: "post"
-  })
-  .then(response => Promise.all([response.json(), response.headers]))
-  .then(([body, headers]) => {
-    const authValu = headers.get("authorization");
-    console.log(authValu);
-    console.log(body);
-  });
-
   return (
-    <div className="App">
-      <h1>Hello World</h1>
-    </div>
+    <Routes>
+      <Route path='/dashboard' element={
+        <PrivateRoute>
+          <Dashboard/>
+        </PrivateRoute>
+      } />
+      <Route path='/assigments/:id' element={
+        <PrivateRoute>
+          <AssigmentView/>
+        </PrivateRoute>
+      }>
+      </Route>
+      <Route path='/login' element={<Login/>} />
+      <Route path='/' element={<Homepage/>} />
+    </Routes>
   );
 }
 

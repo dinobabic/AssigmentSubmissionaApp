@@ -7,14 +7,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.core.Authentication;
 
 import com.assigmentApp.AssigmentSubmissionApp.domain.User;
+import com.assigmentApp.AssigmentSubmissionApp.service.UserDetailsServiceImpl;
 import com.assigmentApp.AssigmentSubmissionApp.util.JwtUtil;
+
+import io.jsonwebtoken.ExpiredJwtException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,6 +34,8 @@ public class AuthenticationController {
 	private JwtUtil jwtUtil;
 	@Autowired
 	private AuthenticationManager authenticationManager;
+	@Autowired
+	private UserDetailsServiceImpl userDetailsService;
 	
 
 	@PostMapping("/authenticate")
@@ -52,6 +62,12 @@ public class AuthenticationController {
 		} catch (BadCredentialsException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
+	}
+	
+	@GetMapping("/validate")
+	public ResponseEntity<?> validateToken(@RequestParam String token, @AuthenticationPrincipal User user) {
+		boolean validToken = jwtUtil.checkIfTokenIsExpired(token);
+		return ResponseEntity.ok(validToken);
 	}
 }
 
