@@ -29,10 +29,14 @@ public class Assigment {
 	@Column(name = "code_review_video_url")
 	private String codeReviewVideoUrl;
 	
+	@Column(name = "number")
+	private Integer number;
+	
 	@ManyToOne(optional = false)
 	private User user;
 	
-	// TODO: private User assignedTo;
+	@ManyToOne
+	private User codeReviewer;
 
 	public Long getId() {
 		return id;
@@ -82,11 +86,25 @@ public class Assigment {
 		this.user = user;
 	}
 
-	/*public User getAssignedTo() {
-		return assignedTo;
+	public Integer getNumber() {
+		return number;
 	}
 
-	public void setAssignedTo(User assignedTo) {
-		this.assignedTo = assignedTo;
-	}*/
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+
+	public User getCodeReviewer() {
+		return codeReviewer;
+	}
+
+	public void setCodeReviewer(User codeReviewer) {
+		this.codeReviewer = codeReviewer;
+	}
+
+	@Override
+	public String toString() {
+		return "Assigment [id=" + id + ", status=" + status + ", githubUrl=" + githubUrl + ", branch=" + branch
+				+ ", codeReviewVideoUrl=" + codeReviewVideoUrl + ", number=" + number + ", user=" + user + "]";
+	}
 }

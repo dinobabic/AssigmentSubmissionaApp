@@ -3,7 +3,7 @@ import { Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownButton, Fo
 import ajax from '../services/fetchService';
 import { useLocalState } from '../util/useLocalStorage';
 
-const AssigmentView = () => {
+const CodeReviewerAssigmentView = () => {
     const assigmentId = window.location.href.split("/assigments/")[1];
     const [assigment, setAssigment] = useState({
         branch: "",
@@ -23,14 +23,10 @@ const AssigmentView = () => {
         setAssigment(newAssigment);
     }
 
-    function save() {
-        if (assigment.status === assigmentStatuses[0].status) {
-            updateAssigment("status", assigmentStatuses[1].status);
-            window.location.href = "/dashboard";
-        }
-        else if (assigment.status === assigmentStatuses[3].status) {
-            updateAssigment("status", assigmentStatuses[2].status);
-            window.location.href = "/dashboard";
+    function save(status) {
+        if (status && assigment.status !== status) {
+            updateAssigment("status", status);
+            window.location.href = "/dashboard"
         }
         else {
             ajax(`/api/assigments/${assigmentId}`, "put", jwt, assigment)
@@ -77,33 +73,13 @@ const AssigmentView = () => {
                                     </Card.Subtitle>
                                 </Row>
                                 <Row>
-                                    <Col className='d-flex align-content-center justify-content-start'>
-                                        <Form.Group className='mt-3'>
-                                            <Form.Label className='me-4' htmlFor='assigmentName' style={{fontSize: "22px"}}>Assigment Number</Form.Label>
-                                            <DropdownButton
-                                                as={ButtonGroup}
-                                                id="assigmentName"
-                                                variant={"info"}
-                                                title={assigment.number ? `Assigment ${assigment.number}` : "Select an Assigment"}
-                                                onSelect={(selectedElement) => {
-                                                    updateAssigment("number", selectedElement);
-                                                }}>
-                                                {assigmentEnums.map((assigmentEnum) => 
-                                                    <Dropdown.Item key={assigmentEnum.assigmentNumber} eventKey={assigmentEnum.assigmentNumber}>
-                                                        {assigmentEnum.assigmentNumber}
-                                                    </Dropdown.Item>
-                                                )}
-                                            </DropdownButton>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
                                     <Col>
                                         <Form.Group className='mt-3'>
                                             <Form.Label htmlFor='githubUrl' style={{fontSize: "22px"}}>GitHub URL</Form.Label>
                                             <Form.Control 
                                                 type="url" 
                                                 id="githubUrl"
+                                                readOnly
                                                 placeholder='Type in your GitHub URl' 
                                                 value={assigment.githubUrl} 
                                                 onChange={(event) => updateAssigment("githubUrl", event.target.value)}/>
@@ -117,42 +93,35 @@ const AssigmentView = () => {
                                             <Form.Control
                                              type='text'
                                              id="branch"
+                                             readOnly
                                              placeholder='Type in branch name'
                                              value={assigment.branch}
                                              onChange={(event) => updateAssigment("branch", event.target.value)}/>
                                         </Form.Group>
                                     </Col> 
                                 </Row>
-                                {assigment.status === "Completed" ? 
-                                (   <div>
-                                    <Row>
-                                        <Col>
-                                            <Form.Group className='mt-3'>
-                                                <Form.Label htmlFor='videoUrl' style={{fontSize: "22px"}}>Review Video URL</Form.Label>
-                                                <Form.Control
-                                                type='url'
+                                <Row>
+                                    <Col>
+                                        <Form.Group className='mt-3'>
+                                            <Form.Label htmlFor='videoUrl' style={{fontSize: "22px"}}>Video Review URL</Form.Label>
+                                            <Form.Control 
+                                                type="url" 
                                                 id="videoUrl"
-                                                placeholder='Type in branch name'
-                                                value={assigment.codeReviewVideoUrl}
+                                                placeholder='Type in your Video Review URl' 
+                                                value={assigment.codeReviewVideoUrl} 
                                                 onChange={(event) => updateAssigment("codeReviewVideoUrl", event.target.value)}/>
-                                            </Form.Group>
-                                        </Col> 
-                                    </Row>
-                                    <Row className='d-flex mt-3'>
-                                        <Col className='d-flex justify-content-between'>
-                                            <Button variant='secondary' onClick={() => {window.location.href = "/dashboard"}}>Back</Button>
-                                        </Col>
-                                    </Row>
-                                    </div>
-                                )
-                                : (
-                                    <Row className='d-flex mt-3'>
-                                        <Col className='d-flex justify-content-between'>
-                                            <Button onClick={() => {save(); /*window.location.href= "/dashboard"*/}}>Submit Assigment</Button>
-                                            <Button variant='secondary' onClick={() => {window.location.href = "/dashboard"}}>Back</Button>
-                                        </Col>
-                                    </Row>
-                                )}
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row className='d-flex mt-3'>
+                                    <Col className='d-flex justify-content-between'>
+                                        <div>
+                                        <Button className='me-2' onClick={() => {save(assigmentStatuses[4].status);}}>Complete Reviewe</Button>
+                                        <Button variant="warning" onClick={() => {save(assigmentStatuses[3].status);}}>Needs Update</Button>
+                                        </div>
+                                        <Button variant='secondary' onClick={() => {window.location.href = "/dashboard"}}>Back</Button>
+                                    </Col>
+                                </Row>
                             </Card.Body>
                         </Card>
                     ) 
@@ -165,4 +134,4 @@ const AssigmentView = () => {
     );
 };
 
-export default AssigmentView;
+export default CodeReviewerAssigmentView;

@@ -16,7 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.assigmentApp.AssigmentSubmissionApp.domain.Assigment;
 import com.assigmentApp.AssigmentSubmissionApp.domain.User;
+import com.assigmentApp.AssigmentSubmissionApp.dto.AssigmentResponseDto;
+import com.assigmentApp.AssigmentSubmissionApp.enums.AuthorityEnum;
 import com.assigmentApp.AssigmentSubmissionApp.service.AssigmentService;
+import com.assigmentApp.AssigmentSubmissionApp.service.UserService;
+import com.assigmentApp.AssigmentSubmissionApp.util.AuthorityUtil;
 
 @RestController
 @RequestMapping("/api/assigments")
@@ -24,6 +28,8 @@ public class AssigmentController {
 	
 	@Autowired
 	private AssigmentService assigmentService; 
+	@Autowired
+	private UserService userService;
 	
 	@PostMapping
 	public ResponseEntity<?> createAssigment(@AuthenticationPrincipal User user) {
@@ -40,11 +46,19 @@ public class AssigmentController {
 	@GetMapping("{assigmentId}")
 	public ResponseEntity<?> getAssigment(@PathVariable Long assigmentId, @AuthenticationPrincipal User user) {
 		Optional<Assigment> assigmentOpt = assigmentService.findById(assigmentId);
-		return ResponseEntity.ok(assigmentOpt.orElse(new Assigment()));
+		AssigmentResponseDto assigmentResponseDto = new AssigmentResponseDto(assigmentOpt.orElse(new Assigment()));
+		return ResponseEntity.ok(assigmentResponseDto);
 	}
 	
 	@PutMapping("{assigmentId}")
 	public ResponseEntity<?> updateAssigment(@RequestBody Assigment assigment, @PathVariable Long assigmentId, @AuthenticationPrincipal User user) {
+		if (assigment.getCodeReviewer() != null) {
+			User codeReviewer = assigment.getCodeReviewer();
+			codeReviewer = userService.findUserByUsername(codeReviewer.getUsername()).orElse(new User());
+			if (AuthorityUtil.hasRole(AuthorityEnum.ROLE_CODE_REVIEWER.name(), codeReviewer)) {
+				assigment.setCodeReviewer(codeReviewer);
+			}
+		}
 		return ResponseEntity.ok(assigmentService.save(assigment));
 	}
 }

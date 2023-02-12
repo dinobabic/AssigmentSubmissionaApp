@@ -81,12 +81,12 @@ const Login = () => {
                                         <Button size='lg' id="submit" type="button" onClick={() => sendLoginRequest()}>
                                             Login
                                         </Button>
-                                        <Button variant="secondary" size='lg' type="button" onClick={() => window.location.href = "/"}>
+                                      <Button variant="secondary" size='lg' type="button" onClick={() => window.location.href = "/"}>
                                             Exit
                                         </Button>
                                     </Form.Group>
                                 </Col>
-                            </Row>
+                            </Row>  
                         </Card.Body>
                     </Card>
                 </Col>

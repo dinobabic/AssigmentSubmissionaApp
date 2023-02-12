@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtil {
 
-    public static final long JWT_TOKEN_VALIDITY = 5*1000;
+    public static final long JWT_TOKEN_VALIDITY = 24*60*60*1000;
 
     private static final String SECRET_KEY = "6150645367566B5970337336763979244226452948404D6251655468576D5A71";
 
@@ -51,7 +52,12 @@ public class JwtUtil {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    	HashMap<String, Object> claims = new HashMap<>();
+    	claims.put("authorities", userDetails.getAuthorities()
+    			.stream()
+    			.map((auth) -> auth.getAuthority())
+    			.collect(Collectors.toList()));
+        return generateToken(claims, userDetails);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
